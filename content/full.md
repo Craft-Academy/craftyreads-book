@@ -119,7 +119,7 @@ Il ne reste plus qu'à faire passer le test en corrigeant l'assertion :
 ```
 
 
-[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/6fda71790e0f8908a277d524e5b8fe6225f2e131)
+[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/462bd624b8559f1f0b0be18b587e2d1007dacc61)
 Maintenant que notre test passe, il faut passer à l'étape 2 du walking skeletong : utiliser l'UI comme primary adapter.
 
 Le problème que l'on a ici c'est que tout est déclaré directement dans le test. Il exite des dépendances implicites.
