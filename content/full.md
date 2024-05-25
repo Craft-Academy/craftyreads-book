@@ -1,4 +1,5 @@
 # Full page
+[Commit checkpoint](/fc812b3b3cec8ea318ec9a2f0e465e3e425b68aa)
 # Installation du projet
 
 Pour démarrer le plus simplement possible le projet, j'utilise la commande de la cli de Nest, en strict mode :
@@ -9,6 +10,7 @@ J'utilise npm, et le projet est prêt !
 Il y a évidemment plusieurs fichiers scaffoldés pour nous, on fera le ménage plus tard ;)
 
 
+[Commit checkpoint](/22ff006f15cc0075147455808afeedcf24b6525f)
 # Walking Skeleton
 
 Une notion très importante lorsque l'on commence un nouveau projet est de commencer par un Walking Skeleton. Cette approche permet de mettre en place de bout en bout une première fonctionnalité, très très petite, mais qui le mérite de mettre en place l'architecture logicielle et infra dès le début du projet, permettant aux deux d'évoluer en parallèle.
@@ -117,6 +119,7 @@ Il ne reste plus qu'à faire passer le test en corrigeant l'assertion :
 ```
 
 
+[Commit checkpoint](/6fda71790e0f8908a277d524e5b8fe6225f2e131)
 Maintenant que notre test passe, il faut passer à l'étape 2 du walking skeletong : utiliser l'UI comme primary adapter.
 
 Le problème que l'on a ici c'est que tout est déclaré directement dans le test. Il exite des dépendances implicites.
