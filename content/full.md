@@ -156,7 +156,7 @@ La dernière étape : brancher une vraie base de données. Si l'on ne souhaite p
 Comme convenu, on commence par un test :
 
 `src/add-book.spec.ts`
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/228cecddbec3d87c3a537ac611270e82" %}
 
 Plusieurs petites choses à noter ici :
 
@@ -168,17 +168,17 @@ Plusieurs petites choses à noter ici :
 
 On va pouvoir maintenant implémenter les classes qui nous manquent pour que le test échoue pour les bonnes raisons :
 
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/266b9f7038eded301a1ff69991b30dc8" %}
 
 Cette fois on a bien le bon message d'erreur dans le test :
 
 {% hint style="danger" %}
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/b4bd7cc2b7acaeb101d52eb182c1ad88" %}
 {% endhint %}
 
 Il ne reste plus qu'à faire passer le test en corrigeant l'assertion :
 
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/06e1eb81f3839bb5d3afa47c1daf0745" %}
 
 [Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/462bd624b8559f1f0b0be18b587e2d1007dacc61)
 Maintenant que notre test passe, il faut passer à l'étape 2 du walking skeletong : utiliser l'UI comme primary adapter.
@@ -288,22 +288,22 @@ Dans notre cas, il y a deux contrats :
 Pour instaurer la mise en place de ces contrats, et surtout du deuxième donc (puisque le premier peut être omis si on décide de s'éloigner de la vision "pure"), il faut que notre couche application, le use case AddBookUseCase déclare qu'il peut communiquer avec le contrat lié à la communication extérieure. Plutôt que de dépendre directement de l'implémentation concrète BookRepository, il dépend maintenant de l'interface BookRepository. L'implémentation concrète se voit injectée dans le constructeur. Ce faisant, AddBookUseCase déclare qu'il doit nécessairement pouvoir communiquer avec un objet qui respecte le contrat de l'interface BookRepository. Il s'en fiche de savoir l'implémentation concrète derrière.
 
 `add-book.spec.ts`
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/7562d40a64ce3e6b7bc4bc821dc1a147" %}
 
 Le use case est maintenant dans son propre fichier.
 
 `add-book.usecase.ts`
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/a154f08ce1a4dec51485586f8ca75ddd" %}
 
 Un définit explicitement le contrat d'interface du port BookRepository :
 
 `book-repository.port.ts`
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/69bdad80f06b3d82bd0bb19b3a3b9c74" %}
 
 Il suffit maintenant d'implémenter un `StubBookRepository` (qui est en fait ici plutôt un spy, dans le sens où sa seule fonctionnalité pour le moment est "d'espionner" le fait qu'on a voulu sauvegarder un livre) :
 
 `stub.book-repository.ts`
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/e317fd00938133fe4dfb9d0fc4d89448" %}
 
 [Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/bd8ff7031fd545ac1b286ba8dc6f4467d9e9395e)
 # Etape 2 : branchement de l'UI
@@ -501,17 +501,17 @@ Comme on a déjà un dossier test à la racine, autant utiliser ce dossier !
 On se retrouve donc avec ces changements :
 
 `package.json`
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/a64871bf771247e332cacd49b61527be" %}
 
 `playwright.config.ts` : C'est la configuration générée lors de l'initialisation de playwright.
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/0c8d909306979383ce495b598135db5d" %}
 
 Ici ce qu'il est important de remarquer c'est que j'ai décommenté l'option webServer à la fin du fichier de configuration, pour que playwright lance automatiquement le serveur avant d'exécuter les tests. Pour l'instant c'est amplement suffisant pour ce que l'on veut tester :)
 
 Maintenant vient la partie intéressante : notre premier test playwright :
 
 `test/example.spec.ts`
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/98cfa94ae801e49c38044598468d3e95" %}
 
 Comme on peut le voir, c'est un test absolument trivial (j'ai même pas pris la peine de changer le nom du fichier). L'idée est ici d'avoir la plus petite étape possible intéressante pour avancer dans notre découverte de HTMX, et dans la configuration global du projet.
 
@@ -567,7 +567,7 @@ C'est-à-dire que l'on s'attend à recevoir un message d'erreur indiquant que le
 
 J'ai donc demandé à mon pote ChatGPT de me générer le html minimum, il a fait un peu de zèle, mais voilà ce que j'ai donc modifié :
 
-{% embed url="" %}
+{% embed url="https://gist.github.com/PCreations/f2e8e7dcd6c04de1a7218c56e739d936" %}
 
 test gist
 
