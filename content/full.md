@@ -42,7 +42,7 @@ La dernière étape : brancher une vraie base de données. Si l'on ne souhaite p
 Comme convenu, on commence par un test :
 
 `src/add-book.spec.ts`
-{% embed url="https://gist.github.com/PCreations/09d2a9e5950cacc09c8e6fc863be70b5" %}
+{% embed url="https://gist.github.com/PCreations/d00a178cb9b5922a671729dd65684562" %}
 
 Plusieurs petites choses à noter ici :
 
@@ -54,17 +54,17 @@ Plusieurs petites choses à noter ici :
 
 On va pouvoir maintenant implémenter les classes qui nous manquent pour que le test échoue pour les bonnes raisons :
 
-{% embed url="https://gist.github.com/PCreations/ff9c8ee8c33b4efdaf8134c1fb868fd3" %}
+{% embed url="https://gist.github.com/PCreations/d4ad14caca90c09e2407c9383b83aee2" %}
 
 Cette fois on a bien le bon message d'erreur dans le test :
 
 {% hint style="danger" %}
-{% embed url="https://gist.github.com/PCreations/ef9bc294a165a19f7a5a2ccfb7a22758" %}
+{% embed url="https://gist.github.com/PCreations/e8012577f5d4ea667298cbd4d9b05312" %}
 {% endhint %}
 
 Il ne reste plus qu'à faire passer le test en corrigeant l'assertion :
 
-{% embed url="https://gist.github.com/PCreations/94a55fc9b8ae4841368f0ef8cb10694a" %}
+{% embed url="https://gist.github.com/PCreations/9e42587209f083b918dd650a5a5f3576" %}
 
 
 
@@ -90,22 +90,22 @@ Dans notre cas, il y a deux contrats :
 Pour instaurer la mise en place de ces contrats, et surtout du deuxième donc (puisque le premier peut être omis si on décide de s'éloigner de la vision "pure"), il faut que notre couche application, le use case AddBookUseCase déclare qu'il peut communiquer avec le contrat lié à la communication extérieure. Plutôt que de dépendre directement de l'implémentation concrète BookRepository, il dépend maintenant de l'interface BookRepository. L'implémentation concrète se voit injectée dans le constructeur. Ce faisant, AddBookUseCase déclare qu'il doit nécessairement pouvoir communiquer avec un objet qui respecte le contrat de l'interface BookRepository. Il s'en fiche de savoir l'implémentation concrète derrière.
 
 `add-book.spec.ts`
-{% embed url="https://gist.github.com/PCreations/a2ac6ce1018c3164c185b711ed7cbeba" %}
+{% embed url="https://gist.github.com/PCreations/dc0dd7d1499ba82643302ade583456ae" %}
 
 Le use case est maintenant dans son propre fichier.
 
 `add-book.usecase.ts`
-{% embed url="https://gist.github.com/PCreations/021037187ccd7aa0b5859b27ab89158b" %}
+{% embed url="https://gist.github.com/PCreations/60c679ed0c552df7ffc8d809b6eead54" %}
 
 Un définit explicitement le contrat d'interface du port BookRepository :
 
 `book-repository.port.ts`
-{% embed url="https://gist.github.com/PCreations/d42b6bae6116334cbd9e25f4e21e7f0f" %}
+{% embed url="https://gist.github.com/PCreations/a9bd2126b782a82e0d113cbbd59a23ff" %}
 
 Il suffit maintenant d'implémenter un `StubBookRepository` (qui est en fait ici plutôt un spy, dans le sens où sa seule fonctionnalité pour le moment est "d'espionner" le fait qu'on a voulu sauvegarder un livre) :
 
 `stub.book-repository.ts`
-{% embed url="https://gist.github.com/PCreations/e991836eb31a154f212a311d596d1eee" %}
+{% embed url="https://gist.github.com/PCreations/c3365f9990b43448a064b9c6f006fc30" %}
 
 
 
@@ -147,17 +147,17 @@ Comme on a déjà un dossier test à la racine, autant utiliser ce dossier !
 On se retrouve donc avec ces changements :
 
 `package.json`
-{% embed url="https://gist.github.com/PCreations/e9e4fdc908506aff96ed6a660b8c9466" %}
+{% embed url="https://gist.github.com/PCreations/83ce099eeab5c042523713c95e95aee5" %}
 
 `playwright.config.ts` : C'est la configuration générée lors de l'initialisation de playwright.
-{% embed url="https://gist.github.com/PCreations/089bfece3e343e2f2b1bb9fa34fd1d84" %}
+{% embed url="https://gist.github.com/PCreations/dd0751fed7f212306a44393defbcf683" %}
 
 Ici ce qu'il est important de remarquer c'est que j'ai décommenté l'option webServer à la fin du fichier de configuration, pour que playwright lance automatiquement le serveur avant d'exécuter les tests. Pour l'instant c'est amplement suffisant pour ce que l'on veut tester :)
 
 Maintenant vient la partie intéressante : notre premier test playwright :
 
 `test/example.spec.ts`
-{% embed url="https://gist.github.com/PCreations/e6aa367a510d2aca19c4f238e69e4d0f" %}
+{% embed url="https://gist.github.com/PCreations/49b357f21d888fa94eaa06a6fc9e5302" %}
 
 Comme on peut le voir, c'est un test absolument trivial (j'ai même pas pris la peine de changer le nom du fichier). L'idée est ici d'avoir la plus petite étape possible intéressante pour avancer dans notre découverte de HTMX, et dans la configuration global du projet.
 
@@ -181,7 +181,7 @@ C'est-à-dire que l'on s'attend à recevoir un message d'erreur indiquant que le
 
 J'ai donc demandé à mon pote ChatGPT de me générer le html minimum, il a fait un peu de zèle, mais voilà ce que j'ai donc modifié :
 
-{% embed url="https://gist.github.com/PCreations/9092a8f86c3f7dc80089bee7055a293b" %}
+{% embed url="https://gist.github.com/PCreations/e8e442e1fa287641262543bc7db4612f" %}
 
 test gist
 
