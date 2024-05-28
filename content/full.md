@@ -42,7 +42,7 @@ La dernière étape : brancher une vraie base de données. Si l'on ne souhaite p
 Comme convenu, on commence par un test :
 
 `src/add-book.spec.ts`
-{% embed url="https://gist.github.com/PCreations/149c66cc8e3063f32f5b2666c72d41cd" %}
+{% embed url="" %}
 
 Plusieurs petites choses à noter ici :
 
@@ -54,17 +54,17 @@ Plusieurs petites choses à noter ici :
 
 On va pouvoir maintenant implémenter les classes qui nous manquent pour que le test échoue pour les bonnes raisons :
 
-{% embed url="https://gist.github.com/PCreations/2ab4df4b2dd9546823ab2b478eadf31f" %}
+{% embed url="" %}
 
 Cette fois on a bien le bon message d'erreur dans le test :
 
 {% hint style="danger" %}
-{% embed url="https://gist.github.com/PCreations/f2a916e478de991e0388ff699956f669" %}
+{% embed url="" %}
 {% endhint %}
 
 Il ne reste plus qu'à faire passer le test en corrigeant l'assertion :
 
-{% embed url="https://gist.github.com/PCreations/cb9e12cc96b40afa95f77d97cf41afcc" %}
+{% embed url="" %}
 
 
 
@@ -90,22 +90,22 @@ Dans notre cas, il y a deux contrats :
 Pour instaurer la mise en place de ces contrats, et surtout du deuxième donc (puisque le premier peut être omis si on décide de s'éloigner de la vision "pure"), il faut que notre couche application, le use case AddBookUseCase déclare qu'il peut communiquer avec le contrat lié à la communication extérieure. Plutôt que de dépendre directement de l'implémentation concrète BookRepository, il dépend maintenant de l'interface BookRepository. L'implémentation concrète se voit injectée dans le constructeur. Ce faisant, AddBookUseCase déclare qu'il doit nécessairement pouvoir communiquer avec un objet qui respecte le contrat de l'interface BookRepository. Il s'en fiche de savoir l'implémentation concrète derrière.
 
 `add-book.spec.ts`
-{% embed url="https://gist.github.com/PCreations/e669f52e83cd04f4875ef052ab56eb42" %}
+{% embed url="" %}
 
 Le use case est maintenant dans son propre fichier.
 
 `add-book.usecase.ts`
-{% embed url="https://gist.github.com/PCreations/a043eda59e27417b1ac26a8fd11b82b7" %}
+{% embed url="" %}
 
 Un définit explicitement le contrat d'interface du port BookRepository :
 
 `book-repository.port.ts`
-{% embed url="https://gist.github.com/PCreations/f616c230ec1c2fa7e551bba1e3be92c0" %}
+{% embed url="" %}
 
 Il suffit maintenant d'implémenter un `StubBookRepository` (qui est en fait ici plutôt un spy, dans le sens où sa seule fonctionnalité pour le moment est "d'espionner" le fait qu'on a voulu sauvegarder un livre) :
 
 `stub.book-repository.ts`
-{% embed url="https://gist.github.com/PCreations/dc8d326fb322cef86b66a6eea3eef74f" %}
+{% embed url="" %}
 
 
 
@@ -147,17 +147,17 @@ Comme on a déjà un dossier test à la racine, autant utiliser ce dossier !
 On se retrouve donc avec ces changements :
 
 `package.json`
-{% embed url="https://gist.github.com/PCreations/f24021a2c2e22648bd6747a9aa7b54bf" %}
+{% embed url="" %}
 
 `playwright.config.ts` : C'est la configuration générée lors de l'initialisation de playwright.
-{% embed url="https://gist.github.com/PCreations/5fb78b56dd340cf7f6068d04b54fd669" %}
+{% embed url="" %}
 
 Ici ce qu'il est important de remarquer c'est que j'ai décommenté l'option webServer à la fin du fichier de configuration, pour que playwright lance automatiquement le serveur avant d'exécuter les tests. Pour l'instant c'est amplement suffisant pour ce que l'on veut tester :)
 
 Maintenant vient la partie intéressante : notre premier test playwright :
 
 `test/example.spec.ts`
-{% embed url="https://gist.github.com/PCreations/76ea92183d701f895857b013fa8742e4" %}
+{% embed url="" %}
 
 Comme on peut le voir, c'est un test absolument trivial (j'ai même pas pris la peine de changer le nom du fichier). L'idée est ici d'avoir la plus petite étape possible intéressante pour avancer dans notre découverte de HTMX, et dans la configuration global du projet.
 
@@ -181,7 +181,7 @@ C'est-à-dire que l'on s'attend à recevoir un message d'erreur indiquant que le
 
 J'ai donc demandé à mon pote ChatGPT de me générer le html minimum, il a fait un peu de zèle, mais voilà ce que j'ai donc modifié :
 
-{% embed url="https://gist.github.com/PCreations/96c51ec3ef5604e9550323d29cbafcd5" %}
+{% embed url="" %}
 
 Et cette fois on obtient bien le bon message d'erreur :
 
