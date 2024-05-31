@@ -173,7 +173,7 @@ L'embed ci-dessous est interactive :)
 
 
 
-[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/0212c9a0f5da95b04ab8947bd2febeb2165dd295)
+[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/2fb2811ef6ce0a34d92751331a00cea610b6d3a0)
 
 La prochaine étape est donc de faire échouer notre test playwright mais pour la bonne raison.
 
@@ -186,6 +186,70 @@ J'ai donc demandé à mon pote ChatGPT de me générer le html minimum, il a fai
 Et cette fois on obtient bien le bon message d'erreur :
 
 {% embed url="https://demo.arcade.software/N7mNTIRSddLsPjzkfFUp?embed&show_copy_link=true" %}
+
+
+
+[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/63d29821bd316f698f64d63f27e87cbeb36a2c07)
+
+L'étape naturelle d'après est donc de simplement faire passer le test :
+
+`src/app.controller.ts`
+
+{% embed url="https://gist.github.com/PCreations/c8b92dca97c73d2c28df1f5c95e15256" %}
+
+Un petit `npx playwright test` nous indique que le test est maintenant vert !
+
+Bon. On n'a rien fait de particulièrement compliqué ici. Je rappelle encore une fois que l'objectif ce walking skeleton est de nous faire avancer dans la "configuration" de notre projet, de prendre un petit peu de temps au départ pour mettre en place les outils qui nous feront gagner un temps fou au fur et à mesure du développement.
+
+Se pose donc maintenant la question suivante : j'ai expliqué précédement que la deuxième étape du walking skeleton était d'utiliser un vrai adapter primaire (ici l'UI), mais on garde pour l'instant un stub pour l'adapteur secondaire (la base de données).
+
+Seulement voilà : nos tests se lancent depuis l'UI, donc depuis un "vrai" site qui tourne. Comment configurer notre "stub" dans ces conditions ? Notre test n'a pas accès au stub, le site tourne dans un processus complètement différent des tests !
+
+Rappelons-nous le rôle le plus important du walking skeleton : avancer dans la configuration du projet et la mise en place de l'architecture logicielle sous-jacente et des différents outils.
+
+Le rôle du walking skeleton n'est PAS d'avoir un code parfait tout de suite !
+
+Il nous reste donc ici quelques éléments à gérer :
+
+- l'injection de dépendances de NestJS
+- l'utilisation de htmx
+
+L'objectif de cette seconde étape de notre walking skeleton va donc être de mettre en place ces éléments. Le test depuis l'UI sera temporairement non-optimal, mais ils nous sera toutefois utile pour avancer.
+
+Le plan sera donc le suivant :
+
+- on va afficher un simple formulaire avec un seul champ "title" pour ajouter le titre du livre
+- on va se servir de notre use case AddBookUseCase dans le controller pour nous forcer à configurer l'injection de dépendances de NestJS
+- notre use case étant déjà testé unitairement avec le stub, on va pour l'instant simplement partir du principe que si le use case ne throw pas d'erreur, c'est que le livre a bien été enregistré
+- on va renvoyer "book added" dans le controller lorsque le livre est ajouté.
+
+Il manque évidemment ici dans le cadre d'un vrai test d'acceptation le fait de vérifier que le livre est réellement dans la base de données (il faudrait même le vérifier à travers l'api publique et non directement via la base de données). Comme pour l'instant nous n'avons pas la fonctionnalité de récupérer un livre dans l'api publique du projet, on se contente ici d'un test imparfait qui nous fait simplement avancer dans la configuration globale du projet.
+
+A la fin du walking skeleton, ce test sera mis à jour et sera cette fois-çi beaucoup plus pertinent.
+
+Let's go !
+
+
+
+[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/847ac8e0ca2948594a9617007436c55c7a8fc980)
+
+J'ai supprimé le test d'exemple et l'ai remplacé par le test qui nous intéresse :
+
+`test/add-book.spec.ts`
+{% embed url="https://gist.github.com/PCreations/a02214ff00b6aa928ab36f506cd1c186" %}
+
+Rien de bien compliqué ici, le test parle de lui-même.
+
+Venons-en maintenant à la modification du controller :
+
+`src/app.controller.ts`
+{% embed url="https://gist.github.com/PCreations/8d745e80c907e26db8cb5a2082652364" %}
+
+On-ne-peut plus simple là aussi ! On fait les choses rapidement, mais proprement. Dans le sens où on est couvert par notre test ;)
+
+Bon évidemment, le test ne passe pas :
+
+{% embed url="https://app.arcade.software/share/pJ3CCEiA8i6ra1kI8AND" %}
 
 
 
