@@ -253,3 +253,89 @@ Bon évidemment, le test ne passe pas :
 
 
 
+[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/3ddc7b664b69186c7dddda0d7814eac35122c0fd)
+
+Avant de nous concentrer sur la partie configuration + htmx, concentrons-nous à faire passer ce test.
+
+La façon la plus simple de le faire passer est tout simplement de vérifier l'existence d'une query dans l'url, ce qui implique que le formulaire a été envoyé, et afficher "Book added" dans ce cas :
+
+`src/app.controller.ts`
+{% embed url="https://gist.github.com/PCreations/a8f666a88d68916cff6b22f3bc09f7f5" %}
+
+Le decorator @Query permet de récuperer les paramètres de query de l'url. Quand le formulaire est validé, la méthode par défaut est "GET", encore une fois on fait au plus simple ici. A terme ça ne sera pas un GET ;)
+
+S'il y a une query dans l'url, on affiche donc "Book added". Et le test passe :
+
+{% embed url="https://app.arcade.software/share/gLvsvN3nVOT07I5dDwqa" %}
+
+{% hint style="warning" %}
+"Mais rien n'empêche ici d'écrire n'importe quoi dans l'url en tant que query title directement et le test passera toujours ! On ne teste rien ici finalement 🤷🏼"
+{% endhint %}
+
+C'est en effet une bonne remarque. C'est parce que le but de ce "test" ici n'est à cette étape pas de tester le bon fonctionnement de notre app, mais de nous servir de guide pour compléter la "step 0" de notre projet !
+
+Prenons un exemple :
+
+`src/app.controller.ts`
+{% embed url="https://gist.github.com/PCreations/dccff5d48af03b980acf4d48d560643f" %}
+
+J'ai simplement ajouté notre `AddBookUseCase` en tant que dépendance. Et notre test ne passe plus ! Eh oui, on a oublié de configurer notre injection de dépendances...
+
+{% embed url="https://app.arcade.software/share/TSutqxXQsi3ZQ3aPwUB1" %}
+
+{% hint style="warning" %}
+"Ouais enfin merci mais j'ai pas besoin d'un test automatisé pour me dire que j'ai oublié de configuer mon injection de dépendances hein...Quand j'ai mon app qui tourne en `watch`, l'erreur serait apparue directement aussi, même plus rapidement qu'avec le test !"
+{% endhint %}
+
+Et c'est complètement vrai !
+
+Encore une fois, je rappelle qu'ici le rôle de notre walking skeleton est d'avoir tout de configuré, ici le test nous indique effectivement que nous avons mal configuré l'application, mais c'est un "bonus" en l'occurrence.
+
+
+
+[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/fd72eb59f16581877ee269bc0c1824fb38a20555)
+
+Voici les quelques modifications à apporter pour configurer correctement NestJS :
+
+`src/book-repository.port.ts`
+{% embed url="https://gist.github.com/PCreations/6810931eba6f2472eabdb3dd30efb379" %}
+
+Ici j'ai changé l'interface en abstract class. Les plus puristes d'entre nous vont crier à l'hérésie !
+
+En effet, on déconseille généralement d'utiliser les abstract class en lieu et place des interfaces, pour éviter d'avoir des implémentations par défaut, et parce que beaucoup de languages ne peuvent pas étendre plusieurs abstract classes.
+
+Ceci étant dit, en TypeScript il faut savoir deux choses :
+
+- les interfaces n'ont pas d'existence réelle une fois compilée. On ne peut donc pas s'en servir directement comme token pour l'injection de dépendances
+- les abstracts classes peuvent être "implémentée" plutôt qu'étendues. Oui oui, on peut faire `class Toto implements MonAbstractClass`
+
+Il faut cependant resté rigoureux sur le fait de ne pas ajouter de comportement par défaut dans ces classes pour respecter leur contrat de "port".
+
+Si l'on tient vraiment à utiliser des interfaces, on peut utiliser un token manuellement, en exportant par exemple dans le même fichier que l'interface un `Symbol` du nom de l'interface, exemple : `export const BookRepository = new Symbol('BookRepository')`.
+
+Il faudrait alors utiliser ce symbole dans l'injection de dépendances de NestJS, et passer par un `useFactory` pour correctement configurer le provider.
+
+C'est beaucoup plus verbeux, donc par pragmatisme je conseille d'utiliser plutôt une abstract class :)
+
+Ne reste plus qu'à ajouter le decorator `@Injectable()` dans notre `AddBookUseCase` pour indiquer à NestJS qu'il doit voir ses dépendances injectées.
+
+{% embed url="https://gist.github.com/PCreations/bf14878853720f951309fd96c84837e7" %}
+
+{% hint style="warning" %}
+"Oula oula, mais attends, le principe de l'architecture hexagonale, la clean archi, tout ça tout ça là, c'est pas justement de séparer le framework du coeur de métier ? Qu'est-ce que ce decorator propre à NestJS vient faire dans notre beau code censé être framework-agnostique !"
+{% endhint %}
+
+Alors oui, mais non.
+
+Encore une fois il s'agit ici d'être pragmatique. Il est en effet très important de séparer la logique métier du la logique technique du framework ou autre. Mais ici il faut relativiser : ce n'est qu'une dépendance via un decorator. Decorator même pas pris en compte dans nos tests unitaires, donc complètement invisible pour nous !
+
+Si l'on voulait se passer complètement de ce decorator, on pourrait passer par des `useFactory()` comme cité au dessus. Ce qui ferait écrire plus de code de configuration dans le framework.
+
+Ici je décide donc d'utiliser les outils du framework pour me faciliter la vie, et dans l'éventualité où un jour je veuille chagner de framework Node (on sait très bien que ça n'arrivera jamais), j'aurais juste à retirer ces decoratos. Not a big deal ;)
+
+Ne reste plus qu'à configurer notre module NestJS :
+
+{% embed url="https://gist.github.com/PCreations/eff81af95c9424d3476547ef56a5364d" %}
+
+
+
