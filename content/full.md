@@ -665,7 +665,7 @@ Ne reste plus qu'à configurer notre module NestJS :
 
 
 
-[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/53d93d32f6384f98dc9c8be77d025ba732322945)
+[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/81821a1b885dff3739615613b38258e3e51d19fa)
 
 Maintenant que la configuration du module est correcte, le test passe à nouveau :)
 
@@ -732,8 +732,8 @@ Puis une deuxiième fois dans la partie "act" du test, lorsque l'on veut tenter 
 
 Evidemment, tester si un livre existe déjà uniquement par son titre n'est pas suffisant en pratique ! Ici ça va cependant nous aider à tester plusieurs choses :
 
- - vérifier que l'on utilise bien le use case (car pour l'instant on ne l'utilise pas)
- - vérifier que htmx est capable de correctement remplacer le contenu du formulaire pour afficher l'erreur
+- vérifier que l'on utilise bien le use case (car pour l'instant on ne l'utilise pas)
+- vérifier que htmx est capable de correctement remplacer le contenu du formulaire pour afficher l'erreur
 
 Avec ça, il ne nous restera plus qu'à brancher un "vrai" adapter secondaire pour le BookRepository et notre walking skeleton sera terminé !
 
@@ -773,11 +773,12 @@ Ce test va évidemment échouer. On peut maintenant descendre d'un niveau et pas
 +    );
 +  });
  });
+```
 
 Plusieurs choses intéressantes ici :
 
- - Tout d'abord, on ajoute manuellement le livre "Clean Code" dans notre StubRepository, qui devient au passage un Fake, car simulant une implémentation réelle.
- - On s'attend ensuite à ce que le use case échoue avec une erreur de type `BookAlreadyExistsError`. Cette erreur n'existe évidemment pas encore.
+- Tout d'abord, on ajoute manuellement le livre "Clean Code" dans notre StubRepository, qui devient au passage un Fake, car simulant une implémentation réelle.
+- On s'attend ensuite à ce que le use case échoue avec une erreur de type `BookAlreadyExistsError`. Cette erreur n'existe évidemment pas encore.
 
 Au passage, comme le StubBookRepository devient un Fake, on va changer le nom et l'appeler avec la nomenclature que j'utilise pour mes adapters classiques : TechnoXXXRepository. On est sur un repository en mémoire, donc partons pour le nom `InMemoryBookRepository`
 
