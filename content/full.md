@@ -42,22 +42,7 @@ La dernière étape : brancher une vraie base de données. Si l'on ne souhaite p
 Comme convenu, on commence par un test :
 
 `src/add-book.spec.ts`
-```diff
- -0,0 +1,12 @@
-+describe('Feature: Adding a book', () => {
-+  test('Example: User can add a book', async () => {
-+    const bookRepository = new BookRepository();
-+    const addBook = new AddBookUseCase();
-+
-+    await addBook.execute({ title: 'Clean Code' });
-+
-+    expect(bookRepository.lastSavedBook).toEqual({
-+      title: 'Clean OSdod',
-+    });
-+  });
-+});
-
-```
+{% embed url="https://gist.github.com/PCreations/149c66cc8e3063f32f5b2666c72d41cd" %}
 
 Plusieurs petites choses à noter ici :
 
@@ -69,57 +54,17 @@ Plusieurs petites choses à noter ici :
 
 On va pouvoir maintenant implémenter les classes qui nous manquent pour que le test échoue pour les bonnes raisons :
 
-```diff
- -1,7 +1,18 @@
- describe('Feature: Adding a book', () => {
-   test('Example: User can add a book', async () => {
-     // Pour l'instant je me contente d'écrire le code le plus simple possible
-+    class BookRepository {
-+      lastSavedBook: { title: string } | undefined;
-+    }
-+
-     const bookRepository = new BookRepository();
--    const addBook = new AddBookUseCase(bookRepository);
-+
-+    class AddBookUseCase {
-+      async execute(book: { title: string }) {
-+        bookRepository.lastSavedBook = book;
-+      }
-+    }
-+
-+    const addBook = new AddBookUseCase();
-
-     await addBook.execute({ title: 'Clean Code' });
-```
+{% embed url="https://gist.github.com/PCreations/2ab4df4b2dd9546823ab2b478eadf31f" %}
 
 Cette fois on a bien le bon message d'erreur dans le test :
 
 {% hint style="danger" %}
-```diff
-- Expected  - 1
-+ Received  + 1
-
-  Object {
--   "title": "Clean OSdod",
-+   "title": "Clean Code",
-  }
-```
+{% embed url="https://gist.github.com/PCreations/f2a916e478de991e0388ff699956f669" %}
 {% endhint %}
 
 Il ne reste plus qu'à faire passer le test en corrigeant l'assertion :
 
-```diff
- -17,7 +17,7 @@ describe('Feature: Adding a book', () => {
-     await addBook.execute({ title: 'Clean Code' });
-
-     expect(bookRepository.lastSavedBook).toEqual({
--      title: 'Clean OSdod',
-+      title: 'Clean Code',
-     });
-   });
- });
-
-```
+{% embed url="https://gist.github.com/PCreations/cb9e12cc96b40afa95f77d97cf41afcc" %}
 
 
 
@@ -145,71 +90,22 @@ Dans notre cas, il y a deux contrats :
 Pour instaurer la mise en place de ces contrats, et surtout du deuxième donc (puisque le premier peut être omis si on décide de s'éloigner de la vision "pure"), il faut que notre couche application, le use case AddBookUseCase déclare qu'il peut communiquer avec le contrat lié à la communication extérieure. Plutôt que de dépendre directement de l'implémentation concrète BookRepository, il dépend maintenant de l'interface BookRepository. L'implémentation concrète se voit injectée dans le constructeur. Ce faisant, AddBookUseCase déclare qu'il doit nécessairement pouvoir communiquer avec un objet qui respecte le contrat de l'interface BookRepository. Il s'en fiche de savoir l'implémentation concrète derrière.
 
 `add-book.spec.ts`
-```diff
-+import { AddBookUseCase } from './add-book.usecase';
-+import { StubBookRepository } from './stub.book-repository';
-+
- describe('Feature: Adding a book', () => {
-   test('Example: User can add a book', async () => {
--    class BookRepository {
--      lastSavedBook: { title: string } | undefined;
--    }
--
--    const bookRepository = new BookRepository();
--
--    class AddBookUseCase {
--      async execute(book: { title: string }) {
--        bookRepository.lastSavedBook = book;
--      }
--    }
-+    const bookRepository = new StubBookRepository(); // ici on instantie notre stub de BookRepository
-
--    const addBook = new AddBookUseCase();
-+    const addBook = new AddBookUseCase(bookRepository); // la dépendance est maintenant injectée.
-
-     await addBook.execute({ title: 'Clean Code' });
-```
+{% embed url="https://gist.github.com/PCreations/e669f52e83cd04f4875ef052ab56eb42" %}
 
 Le use case est maintenant dans son propre fichier.
 
 `add-book.usecase.ts`
-```diff
- -0,0 +1,9 @@
-+import { BookRepository } from './book-repository.port';
-+
-+export class AddBookUseCase {
-+  constructor(private readonly bookRepository: BookRepository) {}
-+
-+  execute(book: { title: string }) {
-+    return this.bookRepository.save(book);
-+  }
-+}
-```
+{% embed url="https://gist.github.com/PCreations/a043eda59e27417b1ac26a8fd11b82b7" %}
 
 Un définit explicitement le contrat d'interface du port BookRepository :
 
 `book-repository.port.ts`
-```diff
-+export interface BookRepository {
-+  save(book: { title: string }): Promise<void>;
-+}
-```
+{% embed url="https://gist.github.com/PCreations/f616c230ec1c2fa7e551bba1e3be92c0" %}
 
 Il suffit maintenant d'implémenter un `StubBookRepository` (qui est en fait ici plutôt un spy, dans le sens où sa seule fonctionnalité pour le moment est "d'espionner" le fait qu'on a voulu sauvegarder un livre) :
 
 `stub.book-repository.ts`
-```diff
- -0,0 +1,9 @@
-+import { BookRepository } from './book-repository.port';
-+
-+export class StubBookRepository implements BookRepository {
-+  lastSavedBook: { title: string } | undefined;
-+
-+  async save(book: { title: string }): Promise<void> {
-+    this.lastSavedBook = book;
-+  }
-+}
-```
+{% embed url="https://gist.github.com/PCreations/dc8d326fb322cef86b66a6eea3eef74f" %}
 
 
 
@@ -251,115 +147,17 @@ Comme on a déjà un dossier test à la racine, autant utiliser ce dossier !
 On se retrouve donc avec ces changements :
 
 `package.json`
-```diff
-       "ts"
-     ],
-     "rootDir": "src",
--    "testRegex": ".*\.spec\.ts$",
-+    "testRegex": "src/.*\.spec\.ts$", // Ici je modifie la configuration Jest pour qu'il ne cherche pas à exécuter les tests présents dans le dossier test, mais uniquement ceux dans le dossier src/
-     "transform": {
-       "^.+\.(t|j)s$": "ts-jest"
-     },
-```
+{% embed url="https://gist.github.com/PCreations/f24021a2c2e22648bd6747a9aa7b54bf" %}
 
 `playwright.config.ts` : C'est la configuration générée lors de l'initialisation de playwright.
-```diff
- -0,0 +1,77 @@
-+import { defineConfig, devices } from '@playwright/test';
-+
-+/**
-+ * Read environment variables from file.
-+ * https://github.com/motdotla/dotenv
-+ */
-+// require('dotenv').config();
-+
-+/**
-+ * See https://playwright.dev/docs/test-configuration.
-+ */
-+export default defineConfig({
-+  testDir: './test',
-+  /* Run tests in files in parallel */
-+  fullyParallel: true,
-+  /* Fail the build on CI if you accidentally left test.only in the source code. */
-+  forbidOnly: !!process.env.CI,
-+  /* Retry on CI only */
-+  retries: process.env.CI ? 2 : 0,
-+  /* Opt out of parallel tests on CI. */
-+  workers: process.env.CI ? 1 : undefined,
-+  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-+  reporter: 'html',
-+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-+  use: {
-+    /* Base URL to use in actions like `await page.goto('/')`. */
-+    // baseURL: 'http://127.0.0.1:3000',
-+
-+    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-+    trace: 'on-first-retry',
-+  },
-+
-+  /* Configure projects for major browsers */
-+  projects: [
-+    {
-+      name: 'chromium',
-+      use: { ...devices['Desktop Chrome'] },
-+    },
-+
-+    {
-+      name: 'firefox',
-+      use: { ...devices['Desktop Firefox'] },
-+    },
-+
-+    {
-+      name: 'webkit',
-+      use: { ...devices['Desktop Safari'] },
-+    },
-+
-+    /* Test against mobile viewports. */
-+    // {
-+    //   name: 'Mobile Chrome',
-+    //   use: { ...devices['Pixel 5'] },
-+    // },
-+    // {
-+    //   name: 'Mobile Safari',
-+    //   use: { ...devices['iPhone 12'] },
-+    // },
-+
-+    /* Test against branded browsers. */
-+    // {
-+    //   name: 'Microsoft Edge',
-+    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-+    // },
-+    // {
-+    //   name: 'Google Chrome',
-+    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-+    // },
-+  ],
-+
-+  /* Run your local dev server before starting the tests */
-+  webServer: {
-+    command: 'npm run start',
-+    url: 'http://127.0.0.1:3000',
-+    reuseExistingServer: !process.env.CI,
-+  },
-+});
-```
+{% embed url="https://gist.github.com/PCreations/5fb78b56dd340cf7f6068d04b54fd669" %}
 
 Ici ce qu'il est important de remarquer c'est que j'ai décommenté l'option webServer à la fin du fichier de configuration, pour que playwright lance automatiquement le serveur avant d'exécuter les tests. Pour l'instant c'est amplement suffisant pour ce que l'on veut tester :)
 
 Maintenant vient la partie intéressante : notre premier test playwright :
 
 `test/example.spec.ts`
-```diff
- -0,0 +1,8 @@
-+import { test, expect } from '@playwright/test';
-+
-+test('has title', async ({ page }) => {
-+  await page.goto('http://localhost:3000');
-+
-+  // Expect a title "to contain" a substring.
-+  await expect(page).toHaveTitle(/Crafty Reads/);
-+});
-```
+{% embed url="https://gist.github.com/PCreations/76ea92183d701f895857b013fa8742e4" %}
 
 Comme on peut le voir, c'est un test absolument trivial (j'ai même pas pris la peine de changer le nom du fichier). L'idée est ici d'avoir la plus petite étape possible intéressante pour avancer dans notre découverte de HTMX, et dans la configuration global du projet.
 
@@ -383,25 +181,7 @@ C'est-à-dire que l'on s'attend à recevoir un message d'erreur indiquant que le
 
 J'ai donc demandé à mon pote ChatGPT de me générer le html minimum, il a fait un peu de zèle, mais voilà ce que j'ai donc modifié :
 
-```diff
- -7,6 +7,15 @@ export class AppController {
-
-   @Get()
-   getHello(): string {
--    return this.appService.getHello();
-+    return `
-+<!DOCTYPE html>
-+<html>
-+  <head>
-+      <title>Page Title</title> // Je mets ici volontairement le mauvais titre !
-+  </head>
-+  <body>
-+      <p>Hello, World!</p> // Bon ça c'est la ChatGPT Touch, c'était pas utile.
-+</body>
-+</html>`;
-   }
- }
-```
+{% embed url="https://gist.github.com/PCreations/96c51ec3ef5604e9550323d29cbafcd5" %}
 
 Et cette fois on obtient bien le bon message d'erreur :
 
@@ -415,17 +195,7 @@ L'étape naturelle d'après est donc de simplement faire passer le test :
 
 `src/app.controller.ts`
 
-```diff
- -11,7 +11,7 @@ export class AppController {
- <!DOCTYPE html>
- <html>
-   <head>
--      <title>Page Title</title>
-+      <title>Crafty Reads</title>
-   </head>
-   <body>
-       <p>Hello, World!</p>
-```
+{% embed url="https://gist.github.com/PCreations/c8b92dca97c73d2c28df1f5c95e15256" %}
 
 Un petit `npx playwright test` nous indique que le test est maintenant vert !
 
@@ -466,48 +236,14 @@ Let's go !
 J'ai supprimé le test d'exemple et l'ai remplacé par le test qui nous intéresse :
 
 `test/add-book.spec.ts`
-```diff
- -0,0 +1,12 @@
-+import { test, expect } from '@playwright/test';
-+
-+test.describe('Feature: Adding a book', () => {
-+  test('Example: User can add a book', async ({ page }) => {
-+    await page.goto('http://localhost:3000');
-+
-+    await page.getByLabel(/title/i).fill('Clean Code');
-+    await page.getByText(/add book/i).click();
-+
-+    await expect(page.getByText(/book added/i)).toBeVisible();
-+  });
-+});
-```
+{% embed url="https://gist.github.com/PCreations/a02214ff00b6aa928ab36f506cd1c186" %}
 
 Rien de bien compliqué ici, le test parle de lui-même.
 
 Venons-en maintenant à la modification du controller :
 
 `src/app.controller.ts`
-```diff
- -11,11 +11,15 @@ export class AppController {
- <!DOCTYPE html>
- <html>
-   <head>
--      <title>Crafty Reads</title>
-+    <title>Crafty Reads</title>
-   </head>
-   <body>
--      <p>Hello, World!</p>
--</body>
-+    <form>
-+      <label for="title">Title</label>
-+      <input type="text" id="title" name="title">
-+      <button type="submit">Add book</button>
-+    </form>
-+  </body>
- </html>`;
-   }
- }
-```
+{% embed url="https://gist.github.com/PCreations/8d745e80c907e26db8cb5a2082652364" %}
 
 On-ne-peut plus simple là aussi ! On fait les choses rapidement, mais proprement. Dans le sens où on est couvert par notre test ;)
 
@@ -524,22 +260,7 @@ Avant de nous concentrer sur la partie configuration + htmx, concentrons-nous à
 La façon la plus simple de le faire passer est tout simplement de vérifier l'existence d'une query dans l'url, ce qui implique que le formulaire a été envoyé, et afficher "Book added" dans ce cas :
 
 `src/app.controller.ts`
-```diff
- -6,7 +6,7 @@ export class AppController {
-   constructor(private readonly appService: AppService) {}
-
-   @Get()
--  getHello(): string {
-+  getHello(@Query() query?: { title: string }): string {
-     return `
- // ...
-   <body>
-     <form>
-+    ${query?.title ? '<p>Book added</p>' : ''}
-       <label for="title">Title</label>
-       <input type="text" id="title" name="title">
-       <button type="submit">Add book</button>
-```
+{% embed url="https://gist.github.com/PCreations/a8f666a88d68916cff6b22f3bc09f7f5" %}
 
 Le decorator @Query permet de récuperer les paramètres de query de l'url. Quand le formulaire est validé, la méthode par défaut est "GET", encore une fois on fait au plus simple ici. A terme ça ne sera pas un GET ;)
 
@@ -556,17 +277,7 @@ C'est en effet une bonne remarque. C'est parce que le but de ce "test" ici n'est
 Prenons un exemple :
 
 `src/app.controller.ts`
-```diff
- -1,9 +1,9 @@
- import { Controller, Get, Query } from '@nestjs/common';
--import { AppService } from './app.service';
-+import { AddBookUseCase } from './add-book.usecase';
-
- @Controller()
- export class AppController {
--  constructor(private readonly appService: AppService) {}
-+  constructor(private readonly addBookUseCase: AddBookUseCase) {}
-```
+{% embed url="https://gist.github.com/PCreations/dccff5d48af03b980acf4d48d560643f" %}
 
 J'ai simplement ajouté notre `AddBookUseCase` en tant que dépendance. Et notre test ne passe plus ! Eh oui, on a oublié de configurer notre injection de dépendances...
 
@@ -587,14 +298,7 @@ Encore une fois, je rappelle qu'ici le rôle de notre walking skeleton est d'avo
 Voici les quelques modifications à apporter pour configurer correctement NestJS :
 
 `src/book-repository.port.ts`
-```diff
- -1,3 +1,3 @@
--export interface BookRepository {
--  save(book: { title: string }): Promise<void>;
-+export abstract class BookRepository {
-+  abstract save(book: { title: string }): Promise<void>;
- }
-```
+{% embed url="https://gist.github.com/PCreations/6810931eba6f2472eabdb3dd30efb379" %}
 
 Ici j'ai changé l'interface en abstract class. Les plus puristes d'entre nous vont crier à l'hérésie !
 
@@ -615,15 +319,7 @@ C'est beaucoup plus verbeux, donc par pragmatisme je conseille d'utiliser plutô
 
 Ne reste plus qu'à ajouter le decorator `@Injectable()` dans notre `AddBookUseCase` pour indiquer à NestJS qu'il doit voir ses dépendances injectées.
 
-```diff
- -1,5 +1,7 @@
-+import { Injectable } from '@nestjs/common';
- import { BookRepository } from './book-repository.port';
-
-+@Injectable()
- export class AddBookUseCase {
-   constructor(private readonly bookRepository: BookRepository) {}
-```
+{% embed url="https://gist.github.com/PCreations/bf14878853720f951309fd96c84837e7" %}
 
 {% hint style="warning" %}
 "Oula oula, mais attends, le principe de l'architecture hexagonale, la clean archi, tout ça tout ça là, c'est pas justement de séparer le framework du coeur de métier ? Qu'est-ce que ce decorator propre à NestJS vient faire dans notre beau code censé être framework-agnostique !"
@@ -639,29 +335,7 @@ Ici je décide donc d'utiliser les outils du framework pour me faciliter la vie,
 
 Ne reste plus qu'à configurer notre module NestJS :
 
-```diff
- -1,10 +1,18 @@
- import { Module } from '@nestjs/common';
- import { AppController } from './app.controller';
--import { AppService } from './app.service';
-+import { AddBookUseCase } from './add-book.usecase';
-+import { StubBookRepository } from './stub.book-repository';
-+import { BookRepository } from './book-repository.port';
-
- @Module({
-   imports: [],
-   controllers: [AppController],
--  providers: [AppService],
-+  providers: [
-+    {
-+      provide: BookRepository,
-+      useValue: StubBookRepository,
-+    },
-+    AddBookUseCase,
-+  ],
- })
- export class AppModule {}
-```
+{% embed url="https://gist.github.com/PCreations/eff81af95c9424d3476547ef56a5364d" %}
 
 
 
@@ -672,55 +346,12 @@ Maintenant que la configuration du module est correcte, le test passe à nouveau
 Je profite de cette étape pour faire un petit refactoring purement graphique en ajoutant une dose de tailwind :
 
 `src/app.controller.ts`
-```diff
-export class AppController {
- <html>
-   <head>
-     <title>Crafty Reads</title>
-+    <meta charset="UTF-8">
-+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-+    <script src="https://cdn.tailwindcss.com"></script>
-   </head>
-   <body>
--    <form>
--    ${query?.title ? '<p>Book added</p>' : ''}
--      <label for="title">Title</label>
--      <input type="text" id="title" name="title">
--      <button type="submit">Add book</button>
--    </form>
-+    <main class="container mx-auto px-4 py-8">
-+      ${query?.title ? '<p>Book added</p>' : ''}
-+      <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-+        <div class="mb-4">
-+          <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
-+            Title
-+          </label>
-+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="title" type="text" name="title" placeholder="Enter book title" required>
-+        </div>
-+        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-+          Add Book
-+        </button>
-+      </form>
-+    </main>
-   </body>
- </html>`;
-   }
-
-```
+{% embed url="https://gist.github.com/PCreations/760e335dd6e8b2bb522d8263d9662d15" %}
 
 L'objectif ce walking skeleton, je le rappelle, est de configurer toute la stack que l'on veut utiliser. Il reste notamment ici à tester htmx. Pour "l'installer", rien de plus simple :
 
 `src/app.controller.ts`
-```diff
- -15,6 +15,7 @@ export class AppController {
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <script src="https://cdn.tailwindcss.com"></script>
-+    <script src="https://unpkg.com/htmx.org@2.0.1"></script>
-   </head>
-   <body>
-     <main class="container mx-auto px-4 py-8">
-```
+{% embed url="https://gist.github.com/PCreations/95df6fa6e0482bb7db9e7db02c502312" %}
 
 L'étape suivante est d'ajouter un nouveau test d'acceptation qui va vérifier que l'on ne peut pas ajouter un livre qui existe déjà en base de données.
 
@@ -740,40 +371,12 @@ Avec ça, il ne nous restera plus qu'à brancher un "vrai" adapter secondaire po
 Voici le scénario ajouté dans les tests playwright :
 
 `test/add-book.spec.ts`
-```diff
-+
-+  test('Example: User cannot add a book that already exists', async ({
-+    page,
-+  }) => {
-+    await page.goto('http://localhost:3000');
-+    await page.getByLabel(/title/i).fill('Clean Code');
-+    await page.getByText(/add book/i).click();
-+
-+    await page.getByLabel(/title/i).fill('Clean Code');
-+    await page.getByText(/add book/i).click();
-+
-+    await expect(page.getByText(/book already exists/i)).toBeVisible();
-+  });
- });
-```
+{% embed url="https://gist.github.com/PCreations/39b54500036f3d5ffb6217361a770e84" %}
 
 Ce test va évidemment échouer. On peut maintenant descendre d'un niveau et passer au test unitaire :
 
 `src/add-book.spec.ts`
-```diff
-+  test('Example: User cannot add a book that already exists', async () => {
-+    const bookRepository = new StubBookRepository();
-+    bookRepository.booksByTitle.set('Clean Code', { title: 'Clean Code' });
-+    const addBook = new AddBookUseCase(bookRepository);
-+
-+    const addingBook = addBook.execute({ title: 'Clean Code' });
-+
-+    await expect(addingBook).rejects.toThrowError(
-+      new BookAlreadyExistsError('The book Clean Code already exists'),
-+    );
-+  });
- });
-```
+{% embed url="https://gist.github.com/PCreations/87a00e74930e46569645c6c0c180fa45" %}
 
 Plusieurs choses intéressantes ici :
 
@@ -783,20 +386,7 @@ Plusieurs choses intéressantes ici :
 Au passage, comme le StubBookRepository devient un Fake, on va changer le nom et l'appeler avec la nomenclature que j'utilise pour mes adapters classiques : TechnoXXXRepository. On est sur un repository en mémoire, donc partons pour le nom `InMemoryBookRepository`
 
 `src/in-memory-book.repository.ts`
-```diff
- import { BookRepository } from './book-repository.port';
-
- export class InMemoryBookRepository implements BookRepository {
-+  booksByTitle = new Map<string, { title: string }>(); // J'en profite ici pour créer une Map référençant les livres par titre.
-+
-   lastSavedBook: { title: string } | undefined;
-
-   async save(book: { title: string }): Promise<void> {
-     this.lastSavedBook = book;
-+    this.booksByTitle.set(book.title, book);
-   }
- }
-```
+{% embed url="https://gist.github.com/PCreations/eaea7f124bbe19b67f446b3bf6b4b9b7" %}
 
 
 
@@ -805,80 +395,28 @@ Au passage, comme le StubBookRepository devient un Fake, on va changer le nom et
 Première chose à faire maintenant : créer l'erreur BookAlreadyExistsError pour que le test "compile" :
 
 `book-already-exists.error.ts`
-```diff
- -0,0 +1,5 @@
-+export class BookAlreadyExistsError extends Error {
-+  constructor(bookTitle: string) {
-+    super(`The book ${bookTitle} already exists`);
-+  }
-+}
-```
+{% embed url="https://gist.github.com/PCreations/504ba36ae222777b392e9e7e45e89173" %}
 
 Le test échoue maintenant pour une première raison : on s'attend à ce qu'une erreur soit lancée, alors que pour l'instant aucune erreur n'est lancée.
 
 La logique pour savoir qu'un livre existe va se positionner directement dans le repository. C'est en effet la solution la plus simple et la plus efficace que de déléguer ça au repository (et donc plus tard à la base de données sous-jacente) :
 
 `src/book-repository.port.ts`
-```diff
- -1,3 +1,4 @@
- export abstract class BookRepository {
-   abstract save(book: { title: string }): Promise<void>;
-+  abstract doesBookExist(title: string): Promise<boolean>;
- }
-```
+{% embed url="https://gist.github.com/PCreations/d0caba97c056c0400a933de56b1f6d22" %}
 
 Notre implémentation in-memory est toute simple :
 
-```diff
- -9,4 +9,8 @@ export class InMemoryBookRepository implements BookRepository {
-     this.lastSavedBook = book;
-     this.booksByTitle.set(book.title, book);
-   }
-+
-+  async doesBookExist(title: string): Promise<boolean> {
-+    return this.booksByTitle.has(title);
-+  }
- }
-```
+{% embed url="https://gist.github.com/PCreations/e1c944f7750aa9cdc3a1e503484364f4" %}
 
 Il nous faut maintenant faire une petite modification subtile de notre test pour avoir de nouveau la bonne raison de "fail" du test, en l'occurrence ici avoir par exemple un mauvais message dans l'erreur :
 
 `src/add-book.spec.ts`
-```diff
- -21,8 +22,6 @@ describe('Feature: Adding a book', () => {
-
-     const addingBook = addBook.execute({ title: 'Clean Code' });
-
--    await expect(addingBook).rejects.toThrow(
--      new BookAlreadyExistsError('The book Clean Code already exists'),
--    );
-+    await expect(addingBook).rejects.toThrow(new BookAlreadyExistsError('Foo'));
-   });
- });
-```
+{% embed url="https://gist.github.com/PCreations/7b7aaf0152f803c5d5b323212d438ebe" %}
 
 On peut maintenant implémenter la logique triviale :
 
 `src/add-book.usecase.ts`
-```diff
- -1,11 +1,15 @@
- import { Injectable } from '@nestjs/common';
- import { BookRepository } from './book-repository.port';
-+import { BookAlreadyExistsError } from './book-already-exists.error';
-
- @Injectable()
- export class AddBookUseCase {
-   constructor(private readonly bookRepository: BookRepository) {}
-
--  execute(book: { title: string }) {
-+  async execute(book: { title: string }) {
-+    if (await this.bookRepository.doesBookExist(book.title)) {
-+      throw new BookAlreadyExistsError(book.title);
-+    }
-     return this.bookRepository.save(book);
-   }
- }
-```
+{% embed url="https://gist.github.com/PCreations/d37d8789a5ca0673e4361fa98ba00e02" %}
 
 Notre test fail maintenant pour la bonne raison :
 ```
@@ -895,18 +433,7 @@ Un exemple typique : oublier d'ajouter une valeur à un enum. Ca marche dans le 
 Ne reste plus qu'à faire passer le test maintenant :
 
 `src/add-book.spec.ts`
-```diff
- -22,6 +22,8 @@ describe('Feature: Adding a book', () => {
-
-     const addingBook = addBook.execute({ title: 'Clean Code' });
-
--    await expect(addingBook).rejects.toThrow(new BookAlreadyExistsError('Foo'));
-+    await expect(addingBook).rejects.toThrow(
-+      new BookAlreadyExistsError('Clean Code'),
-+    );
-   });
- });
-```
+{% embed url="https://gist.github.com/PCreations/af4b0a428f269594c293ae236ab9f959" %}
 
 
 
@@ -927,116 +454,22 @@ L'idée est toute simple :
 Commençons par modifier la route affichant le formulaire :
 
 `src/app.controller.ts`
-```diff
- -6,7 +6,7 @@ export class AppController {
-   constructor(private readonly addBookUseCase: AddBookUseCase) {}
-
-   @Get()
--  getHello(@Query() query?: { title: string }): string {
-+  index(): string { // plus besoin de récupérer la querystring, cette route devient simplement notre page de base
-     return `
- <!DOCTYPE html>
- <html>
-```
+{% embed url="https://gist.github.com/PCreations/49a9a47bc4819b87b95c89ffbb7e6712" %}
 
 J'ajoute ensuite le script de htmx, et j'ajoute les attributs htmx vus plus haut :
 
 `src/app.controller.ts`
-```diff
- -15,12 +15,11 @@ export class AppController {
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <script src="https://cdn.tailwindcss.com"></script>
-+    <script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script>
-   </head>
-   <body>
-     <main class="container mx-auto px-4 py-8">
--      ${query?.title ? '<p>Book added</p>' : ''}
--      <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-+      <div id="add-book-form">
-+        <form action="/" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" method="post" hx-boost="true" hx-target="#add-book-form" hx-swap="outerHTML">
-           <div class="mb-4">
-             <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
-               Title
-```
+{% embed url="https://gist.github.com/PCreations/eb8af7594b7fe28191e41eb11f31674a" %}
 
 Il faut ensuite ajouter la nouvelle route : celle qui va recevoir la soumission du formulaire, pour renvoyer soit le formulaire + le message de succces, soit le formulaire + le message d'erreur. Pour l'instant, on duplique comme des sales ! On nettoiera après, l'objectif est d'abord de faire passer les tests d'acceptation :
 
 `src/app.controller.ts`
-```diff
- -35,4 +34,56 @@ export class AppController {
-   </body>
- </html>`;
-   }
-+
-+  @Post()
-+  async addBook(@Body() body: { title: string }) {
-+    try {
-+      await this.addBookUseCase.execute({ title: body.title });
-+      return `
-+        <div id="add-book-form">
-+          <div class="bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900 px-4 py-3 shadow-md" role="alert">
-+            <div class="flex">
-+              <div class="py-1"><svg class="fill-current h-6 w-6 text-teal-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg></div>
-+              <div>
-+                <p class="text-sm">Book added</p>
-+              </div>
-+            </div>
-+          </div>
-+          <form action="/" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" method="post" hx-boost="true" hx-target="#add-book-form" hx-swap="outerHTML">
-+            <div class="mb-4">
-+              <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
-+                Title
-+              </label>
-+              <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="title" type="text" name="title" placeholder="Enter book title" required>
-+            </div>
-+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-+              Add Book
-+            </button>
-+          </form>
-+        </div>
-+      `;
-+    } catch (error) {
-+      return `
-+        <div id="add-book-form">
-+          <div role="alert">
-+            <div class="bg-red-500 text-white font-bold rounded-t px-4 py-2">
-+              Book not added
-+            </div>
-+          </div>
-+          <form action="/" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" method="post" hx-boost="true" hx-target="#add-book-form" hx-swap="outerHTML">
-+            <div class="mb-4">
-+              <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
-+                Title
-+              </label>
-+              <input class="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="title" name="title" type="text" placeholder="Enter book title" name="title" placeholder="Enter book title" required>
-+              <p class="text-red-500 text-xs italic mt-2">${(error as any).message}</p>
-+            </div>
-+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
-+              Add Book
-+            </button>
-+          </form>
-+        </div>
-+      `;
-+    }
-+  }
- }
-```
+{% embed url="https://gist.github.com/PCreations/faf7174f4846e7f18fe9e33875848a25" %}
 
 Un point intéressant que les plus attentifs d'entre-vous auront probablement déjà relevé : je me suis trompé dans la configuration de mon module nest. En effet j'ai utilisé `useValue` au lieu de `useClass`. Aucun problème dans le typage car NestJS ne peut pas remonter l'information jusqu'à là où le `BookRepository` sera injecté. On est donc sur une belle erreur au runtime ! Erreur heureusement vite capturée grâce à notre test d'acceptation !
 
 `src/app.module.ts`
-```diff
- -10,7 +10,7 @@ import { BookRepository } from './book-repository.port';
-   providers: [
-     {
-       provide: BookRepository,
--      useValue: InMemoryBookRepository,
-+      useClass: InMemoryBookRepository,
-     },
-     AddBookUseCase,
-   ],
-```
+{% embed url="https://gist.github.com/PCreations/a8adce811a065ecbedbd1c783172e559" %}
 
 Voici le résultat :
 
@@ -1055,42 +488,10 @@ Il existe plein de façon de remédier à ça. Pour l'instant, on va y remédier
 La solution la plus simple ici est juste de ne pas tenter d'insérer le même livre dans les 2 tests ! Ca assure l'isolation entre les deux tests. Quant à l'isolation du test avec lui-même, on peut tout simplement ajouter un nombre aléatoire en plus dans le nom du livre :
 
 `test/add-book-spec.ts`
-```diff
- -3,8 +3,9 @@ import { test, expect } from '@playwright/test';
- test.describe('Feature: Adding a book', () => {
-   test('Example: User can add a book', async ({ page }) => {
-     await page.goto('http://localhost:3000');
-+    const rand = Math.floor(Math.random() * 1000000);
-
--    await page.getByLabel(/title/i).fill('Clean Code');
-+    await page.getByLabel(/title/i).fill(`Clean Code ${rand}`);
-     await page.getByText(/add book/i).click();
-
-     await expect(page.getByText(/book added/i)).toBeVisible();
-```
+{% embed url="https://gist.github.com/PCreations/d38bca921ade81b047c8debe88722483" %}
 
 `test/add-book-spec.ts`
-```diff
- -14,12 +15,14 @@ test.describe('Feature: Adding a book', () => {
-     page,
-   }) => {
-     await page.goto('http://localhost:3000');
--    await page.getByLabel(/title/i).fill('Clean Code');
-+    await page.getByLabel(/title/i).fill('The Pragmatic Programmer');
-     await page.getByText(/add book/i).click();
-
--    await page.getByLabel(/title/i).fill('Clean Code');
-+    await page.getByLabel(/title/i).fill('The Pragmatic Programmer');
-     await page.getByText(/add book/i).click();
-
--    await expect(page.getByText(/book already exists/i)).toBeVisible();
-+    await expect(
-+      page.getByText(/the book the pragmatic programmer already exists/i),
-+    ).toBeVisible();
-   });
- });
-
-```
+{% embed url="https://gist.github.com/PCreations/87c246be5c08d6c5a4a9ed35a2a13c13" %}
 
 Et le tour est joué ! Nos tests d'acceptation + nos tests unitaires passent :) C'est l'heure de faire un petit refactoring ;)
 
