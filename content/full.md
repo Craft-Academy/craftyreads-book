@@ -632,3 +632,30 @@ Dernière étape, simplement ajouter les scripts de tailwind et de htmx dans le 
 
 
 
+[Commit checkpoint](https://github.com/Craft-Academy/craftyreads/commit/345e1d453d42f5cbcdc227bfe5d5c6488fc49d8e)
+
+{% embed url="https://gist.github.com/PCreations/3ae27dd73778ce00442d506a9f0e5bce" %}
+
+@@
+{% embed url="https://gist.github.com/PCreations/c7d036c35d5c4e1d3af83559b362f2ce" %}
+
+@@
+{% embed url="https://gist.github.com/PCreations/e1fdc05030fe159c79d798bdf91b66a5" %}
+
+@@
+{% embed url="https://gist.github.com/PCreations/d7488381ec51c90fd25aed47a9ed25dd" %}
+
+@@
+{% embed url="https://gist.github.com/PCreations/8d1c0d0f3ccdb63784b381cafe8939fb" %}
+
+@@
+{% embed url="https://gist.github.com/PCreations/d228659c113190486a2ff284f5780f70" %}
+
+@@
+{% embed url="https://gist.github.com/PCreations/f55913593b640cfb8c8620f1eb95d79e" %}
+
+@@
+{% embed url="https://gist.github.com/PCreations/cd9d01a569a3e00205437e26d47dd5cd" %}
+
+
+
